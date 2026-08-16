@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralPM — Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stylesheet/styles.css">
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Local dev entry point: plain script tags, no bundler.
+     Reuses the same component/scripts sources as pages/NeuralPM.html
+     (that one is exported flat for the bundler tool and won't load
+     from this folder layout — use this file for local dev instead). -->
+<script>
+  // FastAPI domain service (backend/main.py). Change if it's running elsewhere.
+  window.NPM_API_BASE = 'http://localhost:8000';
+</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+<script src="scripts/data.js"></script>
+<script src="scripts/api.js"></script>
+<script type="text/babel" data-presets="react" src="component/components.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/charts.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/nav.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/tasks.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/assignment.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/chatbot.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/insights.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/cascade.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/members.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/settings.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/chatpage.jsx"></script>
+<script type="text/babel" data-presets="react" src="component/app.jsx"></script>
+</body>
+</html>

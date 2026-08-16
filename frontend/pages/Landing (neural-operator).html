@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralPM — The Project OS That Never Forgets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* === RESET & TOKENS ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #060B18; --surf: #0D1526; --elev: #111E33; --hov: #162035;
+  --b0: #1A2840; --b1: #1E3352; --b2: #2A4A70;
+  --tx: #F1F5F9; --tx2: #94A3B8; --txm: #4A607A;
+  --blue: #0EA5E9; --blue-d: #0C3D5A; --blue-lo: rgba(14,165,233,0.08);
+  --amber: #F59E0B; --green: #10B981; --red: #EF4444; --purple: #8B5CF6;
+  --glow-sm: 0 0 20px rgba(14,165,233,0.2);
+  --glow-md: 0 0 40px rgba(14,165,233,0.18);
+  --glow-lg: 0 0 80px rgba(14,165,233,0.12);
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--tx); font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* === NAV ======================================================= */
+#lp-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; padding: 22px 48px;
+  transition: background 300ms, padding 300ms, box-shadow 300ms; }
+#lp-nav.scrolled { background: rgba(6,11,24,0.85); backdrop-filter: blur(20px) saturate(1.4);
+  padding: 14px 48px; box-shadow: 0 1px 0 var(--b0); }
+.nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 14px; letter-spacing: 0.12em; }
+.nav-logo-mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--blue) 0%, #0369A1 100%);
+  display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-sm); }
+.nav-links { display: flex; gap: 32px; margin: 0 auto; font-size: 14px; color: var(--tx2); }
+.nav-links a { transition: color 180ms; }
+.nav-links a:hover { color: var(--tx); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 22px;
+  border-radius: 999px; font-size: 13.5px; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; transition: all 180ms; white-space: nowrap; }
+.btn-ghost { background: transparent; color: var(--tx2); border: 1px solid var(--b2); }
+.btn-ghost:hover { color: var(--tx); border-color: var(--blue); }
+.btn-blue { background: var(--blue); color: #fff; box-shadow: var(--glow-sm); }
+.btn-blue:hover { filter: brightness(1.08); box-shadow: var(--glow-md); transform: translateY(-1px); }
+
+/* === HERO ====================================================== */
+.hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; align-items: center; padding: 0 48px; padding-top: 88px;
+  max-width: 1280px; margin: 0 auto; position: relative; }
+/* grid bg dots */
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(30,51,82,0.55) 1px, transparent 0);
+  background-size: 28px 28px; z-index: 0; }
+body > * { position: relative; z-index: 1; }
+.hero-left { padding-right: 56px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px 5px 8px; border-radius: 999px;
+  background: var(--blue-lo); border: 1px solid rgba(14,165,233,0.25);
+  font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 32px; letter-spacing: 0.06em; }
+.hero-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue);
+  box-shadow: 0 0 8px var(--blue); animation: pdot 1.8s infinite; }
+@keyframes pdot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero-h1 { font-family: 'Syne', sans-serif; font-size: clamp(44px, 5.5vw, 76px); font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.0; margin-bottom: 24px;
+  background: linear-gradient(170deg, #fff 40%, rgba(241,245,249,0.55) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-h1 em { font-style: normal; -webkit-text-fill-color: var(--blue); }
+.hero-sub { font-size: 17px; color: var(--tx2); line-height: 1.7; max-width: 440px; margin-bottom: 40px; }
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 52px; }
+.btn-hero { padding: 14px 32px; font-size: 15px; font-weight: 700; }
+.hero-proof { display: flex; gap: 32px; flex-wrap: wrap; }
+.proof-item { display: flex; flex-direction: column; gap: 3px; }
+.proof-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--tx); }
+.proof-label { font-size: 12px; color: var(--txm); }
+
+/* === HERO MOCK APP ============================================= */
+.hero-right { display: flex; align-items: center; justify-content: center; padding-left: 24px; }
+.app-card { width: 100%; max-width: 540px; background: var(--surf); border: 1px solid var(--b2);
+  border-radius: 18px; overflow: hidden; box-shadow: var(--glow-lg), 0 40px 80px rgba(0,0,0,0.5);
+  animation: float 6s ease-in-out infinite; position: relative; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.app-card::before { content: ''; position: absolute; inset: -1px; border-radius: 18px;
+  background: linear-gradient(135deg, rgba(14,165,233,0.3) 0%, transparent 40%, transparent 60%, rgba(14,165,233,0.15) 100%);
+  z-index: 0; pointer-events: none; }
+.app-card > * { position: relative; z-index: 1; }
+/* window bar */
+.app-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border-bottom: 1px solid var(--b0); background: var(--elev); }
+.app-dots { display: flex; gap: 6px; }
+.app-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.app-dots span:nth-child(1) { background: #FF5F57; }
+.app-dots span:nth-child(2) { background: #FEBC2E; }
+.app-dots span:nth-child(3) { background: #28C840; }
+.app-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--tx2); margin-left: 6px; display: flex; align-items: center; gap: 6px; }
+.app-title-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pdot 1.8s infinite; }
+/* two-col layout inside card */
+.app-body { display: grid; grid-template-columns: 1fr 180px; height: 330px; }
+.app-chat { padding: 16px 14px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+.app-mem-panel { border-left: 1px solid var(--b0); padding: 12px 10px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; overflow: hidden; background: rgba(6,11,24,0.4); }
+.amp-header { color: var(--txm); letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 500; }
+.amp-gauge { height: 3px; background: var(--b0); border-radius: 2px; margin-bottom: 2px; overflow: hidden; }
+.amp-gauge-fill { height: 100%; width: 36%; background: linear-gradient(90deg, var(--blue), #38BDF8); border-radius: 2px; transition: width 1s ease; }
+.amp-gauge-label { color: var(--txm); margin-bottom: 10px; }
+.amp-section { color: var(--txm); letter-spacing: 0.08em; margin: 8px 0 4px; }
+/* mem panel items — revealed by JS */
+.mcp-item { display: flex; flex-direction: column; gap: 2px; padding: 4px 0;
+  border-bottom: 1px solid rgba(26,40,64,0.5); opacity: 0; transform: translateX(8px);
+  transition: all 300ms ease; }
+.mcp-item.visible { opacity: 1; transform: none; }
+.mcp-item-top { display: flex; align-items: center; gap: 5px; }
+.mcp-id { color: var(--blue); }
+.mcp-tier { font-size: 8px; font-weight: 700; letter-spacing: 0.05em; padding: 1px 4px; border-radius: 2px; }
+.mcp-tier.act { background: rgba(14,165,233,0.15); color: var(--blue); }
+.mcp-tier.cmpr { background: rgba(139,92,246,0.15); color: var(--purple); }
+.mcp-tier.supr { background: rgba(239,68,68,0.15); color: var(--red); opacity: 0.7; }
+.mcp-rel { color: var(--txm); margin-left: auto; }
+.mcp-sum { color: var(--txm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* mock chat */
+.mc-user { align-self: flex-end; background: linear-gradient(135deg, var(--blue), #0369A1);
+  color: #fff; border-radius: 12px 12px 3px 12px; padding: 8px 12px; font-size: 12px;
+  max-width: 85%; margin-left: auto; box-shadow: var(--glow-sm); }
+.mc-agent-wrap { display: flex; gap: 7px; align-items: flex-start; }
+.mc-agent-icon { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--blue), #0369A1);
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; box-shadow: var(--glow-sm); }
+.mc-agent { font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; color: var(--tx2);
+  line-height: 1.6; white-space: pre-wrap; flex: 1; }
+.mc-cite { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--blue);
+  background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.25);
+  border-radius: 3px; padding: 0 4px; margin: 0 1px; }
+.mc-cursor { display: inline-block; width: 6px; height: 12px; background: var(--blue);
+  border-radius: 1px; margin-left: 1px; vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.app-input { padding: 10px 12px; border-top: 1px solid var(--b0); background: var(--elev);
+  display: flex; align-items: center; gap: 8px; }
+.app-input-field { flex: 1; background: var(--bg); border: 1px solid var(--b1); border-radius: 8px;
+  padding: 7px 10px; font-size: 11px; color: var(--txm); font-family: 'IBM Plex Sans', sans-serif; }
+.app-send { width: 26px; height: 26px; background: var(--blue); border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; box-shadow: var(--glow-sm); }
+
+/* === GLOW BG radials ========================================== */
+.radial-hero { position: absolute; top: 0; right: 0; width: 680px; height: 680px;
+  background: radial-gradient(ellipse at 80% 30%, rgba(14,165,233,0.09) 0%, transparent 65%);
+  pointer-events: none; z-index: 0; }
+.radial-blue { background: radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.07) 0%, transparent 60%);
+  width: 900px; height: 500px; margin: 0 auto; pointer-events: none; }
+
+/* === HOW IT WORKS ============================================== */
+.how { max-width: 1100px; margin: 0 auto; padding: 120px 48px; }
+.how-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; margin-top: 56px; position: relative; }
+.how-steps::before { content: ''; position: absolute; top: 28px; left: calc(33.33% + 16px);
+  right: calc(33.33% + 16px); height: 1px; background: linear-gradient(90deg, var(--blue), var(--purple)); }
+.how-step { padding: 0 32px; }
+.how-step:first-child { padding-left: 0; }
+.how-step:last-child { padding-right: 0; }
+.how-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center;
+  justify-content: center; font-size: 26px; margin-bottom: 20px; position: relative; }
+.how-icon.blue { background: rgba(14,165,233,0.1); box-shadow: 0 0 20px rgba(14,165,233,0.12); }
+.how-icon.purple { background: rgba(139,92,246,0.1); box-shadow: 0 0 20px rgba(139,92,246,0.1); }
+.how-icon.green { background: rgba(16,185,129,0.1); box-shadow: 0 0 20px rgba(16,185,129,0.1); }
+.how-num { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--b2); font-size: 10px; font-weight: 700;
+  color: var(--txm); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; }
+.how-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.how-desc { font-size: 14px; color: var(--tx2); line-height: 1.65; }
+
+/* === BENTO ===================================================== */
+.bento { max-width: 1100px; margin: 0 auto; padding: 0 48px 120px; }
+.bento-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 16px; margin-top: 56px; }
+.bento-card { background: var(--surf); border: 1px solid var(--b0); border-radius: 20px;
+  padding: 32px; overflow: hidden; position: relative; transition: border-color 240ms, transform 200ms; }
+.bento-card:hover { border-color: var(--b2); transform: translateY(-2px); }
+.bento-card.large { grid-row: 1 / 3; }
+.bento-card::after { content: ''; position: absolute; inset: 0; border-radius: 20px; opacity: 0;
+  transition: opacity 400ms; pointer-events: none; }
+.bento-card:hover::after { opacity: 1; }
+.bento-card.large::after { background: radial-gradient(ellipse at 30% 30%, rgba(14,165,233,0.06), transparent 60%); }
+.bento-card.risk::after { background: radial-gradient(ellipse at 80% 20%, rgba(239,68,68,0.06), transparent 60%); }
+.bento-card.assign::after { background: radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.06), transparent 60%); }
+.bento-card.cascade::after { background: radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06), transparent 60%); }
+.bento-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.bento-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+.bento-card.large .bento-label { color: var(--blue); }
+.bento-card.large .bento-label::before { background: var(--blue); box-shadow: 0 0 6px var(--blue); animation: pdot 1.5s infinite; }
+.bento-card.risk .bento-label { color: var(--red); }
+.bento-card.risk .bento-label::before { background: var(--red); }
+.bento-card.assign .bento-label { color: var(--green); }
+.bento-card.assign .bento-label::before { background: var(--green); }
+.bento-card.cascade .bento-label { color: var(--purple); }
+.bento-card.cascade .bento-label::before { background: var(--purple); }
+.bento-heading { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+  margin-bottom: 10px; line-height: 1.2; }
+.bento-sub { font-size: 13.5px; color: var(--tx2); line-height: 1.6; margin-bottom: 24px; }
+/* bento terminal */
+.bento-terminal { background: #070F1C; border: 1px solid var(--b1); border-radius: 10px;
+  padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; min-height: 260px;
+  position: relative; overflow: hidden; line-height: 1.75; }
+.bento-terminal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+.bt-comment { color: var(--blue); }
+.bt-label2 { color: var(--txm); font-size: 9px; letter-spacing: 0.12em; margin-top: 10px; margin-bottom: 2px; }
+.bt-row { color: var(--tx2); }
+.bt-filt { color: var(--txm); opacity: 0.6; }
+.bt-pref { color: var(--amber); }
+.bt-line { animation: slide-in 160ms ease both; }
+@keyframes slide-in { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+/* bento small cards content */
+.mini-risk-list { display: flex; flex-direction: column; gap: 8px; }
+.mini-risk { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: var(--hov); }
+.mini-risk-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.mini-risk-text { font-size: 12.5px; color: var(--tx2); flex: 1; line-height: 1.35; }
+.mini-risk-sev { font-size: 11px; font-weight: 700; }
+.score-card { background: var(--hov); border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; }
+.score-avatar { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex: 0 0 auto; }
+.score-name { font-size: 13px; font-weight: 600; color: var(--tx); margin-bottom: 4px; }
+.score-bar-wrap { flex: 1; }
+.score-bar-bg { height: 4px; background: var(--b0); border-radius: 2px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 2px; transition: width 800ms cubic-bezier(0.16,1,0.3,1); }
+.cascade-gantt { display: flex; flex-direction: column; gap: 6px; }
+.cg-row { display: flex; align-items: center; gap: 8px; }
+.cg-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--txm); width: 80px; flex: 0 0 auto; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cg-track { flex: 1; height: 16px; background: var(--b0); border-radius: 3px; position: relative; overflow: hidden; }
+.cg-bar { position: absolute; top: 2px; height: 12px; border-radius: 2px; }
+
+/* === STATS ===================================================== */
+.stats { border-top: 1px solid var(--b0); border-bottom: 1px solid var(--b0);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--surf) 50%, var(--bg) 100%); }
+.stats-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr);
+  padding: 0 48px; }
+.stat-b { padding: 60px 32px; border-right: 1px solid var(--b0); text-align: center; }
+.stat-b:last-child { border-right: none; }
+.stat-n { font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800;
+  letter-spacing: -0.04em; line-height: 1;
+  background: linear-gradient(135deg, var(--blue) 0%, #38BDF8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-l { font-size: 14px; color: var(--tx2); margin-top: 10px; line-height: 1.45; }
+
+/* === CTA ======================================================= */
+.cta { max-width: 1100px; margin: 0 auto; padding: 160px 48px; text-align: center; position: relative; }
+.cta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(14,165,233,0.07) 0%, transparent 65%);
+  pointer-events: none; z-index: 0; }
+.cta > * { position: relative; z-index: 1; }
+.cta-h { font-family: 'Syne', sans-serif; font-size: clamp(38px, 5.5vw, 72px); font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 24px;
+  background: linear-gradient(170deg, #fff 50%, rgba(241,245,249,0.5));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.cta-sub { font-size: 18px; color: var(--tx2); line-height: 1.65; max-width: 480px;
+  margin: 0 auto 52px; }
+.btn-cta { padding: 18px 48px; font-size: 16px; font-weight: 700; border-radius: 999px;
+  background: var(--blue); color: #fff; border: none; cursor: pointer; font-family: inherit;
+  box-shadow: 0 0 60px rgba(14,165,233,0.25); transition: all 200ms; display: inline-flex; align-items: center; gap: 10px; }
+.btn-cta:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 0 80px rgba(14,165,233,0.35); }
+.cta-note { font-size: 13px; color: var(--txm); margin-top: 22px; }
+
+/* === FOOTER ==================================================== */
+footer { border-top: 1px solid var(--b0); }
+.footer-inner { max-width: 1100px; margin: 0 auto; padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between; }
+.footer-copy { font-size: 13px; color: var(--txm); }
+.footer-link { font-size: 13px; color: var(--txm); transition: color 180ms; }
+.footer-link:hover { color: var(--tx2); }
+
+/* === REVEAL ==================================================== */
+.reveal { opacity: 1; transform: translateY(0px); transition: opacity 550ms ease, transform 550ms cubic-bezier(0.16,1,0.3,1); }
+.reveal.revealed { opacity: 1; transform: none; }
+.d1 { transition-delay: 70ms; }  .d2 { transition-delay: 140ms; }
+.d3 { transition-delay: 210ms; } .d4 { transition-delay: 280ms; }
+
+/* === SECTION LABELS ============================================ */
+.s-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--blue); text-transform: uppercase; margin-bottom: 14px; }
+.s-head { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 48px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; }
+.s-sub { font-size: 17px; color: var(--tx2); line-height: 1.65; max-width: 520px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="lp-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5a3 3 0 0 0-5.6-1.5A2.5 2.5 0 0 0 4 6a2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 15a3 3 0 0 0 5 2"/>
+        <path d="M12 5a3 3 0 0 1 5.6-1.5A2.5 2.5 0 0 1 20 6a2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 15a3 3 0 0 1-5 2"/>
+        <path d="M12 5v12"/>
+      </svg>
+    </div>
+    NEURAL PM
+  </div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#results">Results</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="window.location.href='NeuralPM.html'">Sign in</button>
+    <button class="btn btn-blue" onclick="window.location.href='NeuralPM.html'">Open app →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="position:relative; overflow:hidden;">
+  <div class="radial-hero"></div>
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow"><span class="hero-dot"></span>AI-native · Memory-first · Explainable</div>
+      <h1 class="hero-h1">The PM that<br><em>never forgets.</em></h1>
+      <p class="hero-sub">Four AI agents share a persistent memory. Every assignment explained, every risk justified — and it learns how you lead with every override you make.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-blue btn-hero" onclick="window.location.href='NeuralPM.html'">Enter the operating room →</button>
+        <button class="btn btn-ghost btn-hero">Watch demo</button>
+      </div>
+      <div class="hero-proof">
+        <div class="proof-item"><div class="proof-num"><span class="counter" data-to="74" data-suffix="%">74%</span></div><div class="proof-label">suggestions accepted</div></div>
+        <div class="proof-item"><div class="proof-num"><span class="counter" data-to="6" data-suffix="×">6×</span></div><div class="proof-label">faster to assign</div></div>
+        <div class="proof-item"><div class="proof-num"><span class="counter" data-to="91" data-suffix="%">91%</span></div><div class="proof-label">risks caught early</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="app-card">
+        <!-- window chrome -->
+        <div class="app-bar">
+          <div class="app-dots"><span></span><span></span><span></span></div>
+          <div class="app-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.6-1.5A2.5 2.5 0 0 0 4 6a2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 15a3 3 0 0 0 5 2"/><path d="M12 5a3 3 0 0 1 5.6-1.5A2.5 2.5 0 0 1 20 6a2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 15a3 3 0 0 1-5 2"/><path d="M12 5v12"/></svg>
+            Memory AI
+            <span class="app-title-dot"></span>active
+          </div>
+        </div>
+        <!-- chat + memory panel -->
+        <div class="app-body">
+          <div class="app-chat" id="mock-convo">
+            <div class="mc-user">Why was the Payment API delayed?</div>
+            <div class="mc-agent-wrap">
+              <div class="mc-agent-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.6-1.5A2.5 2.5 0 0 0 4 6a2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 15a3 3 0 0 0 5 2"/><path d="M12 5a3 3 0 0 1 5.6-1.5A2.5 2.5 0 0 1 20 6a2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 15a3 3 0 0 1-5 2"/><path d="M12 5v12"/></svg>
+              </div>
+              <div class="mc-agent">Payment API slipped <span class="mc-cite">[+3 days]</span>. Causal chain:
+1. Scope change <span class="mc-cite">[#4410]</span> — 10x traffic
+2. Re-routed to Sarah <span class="mc-cite">[#4402]</span>
+3. Sarah hit 91% load <span class="mc-cite">[#4418]</span>
+4. Cascade recomputed <span class="mc-cite">[#4421]</span><span class="mc-cursor"></span></div>
+            </div>
+          </div>
+          <div class="app-mem-panel">
+            <div class="amp-header">CONTEXT</div>
+            <div class="amp-gauge"><div class="amp-gauge-fill"></div></div>
+            <div class="amp-gauge-label">2,940 / 8,192</div>
+            <div class="amp-section">LOADED</div>
+            <div class="mcp-item visible"><div class="mcp-item-top"><span class="mcp-id">#4421</span><span class="mcp-tier act">ACT</span><span class="mcp-rel">0.95</span></div><div class="mcp-sum">Payment API +3d</div></div>
+            <div class="mcp-item visible"><div class="mcp-item-top"><span class="mcp-id">#4418</span><span class="mcp-tier act">ACT</span><span class="mcp-rel">0.81</span></div><div class="mcp-sum">Sarah overload 91%</div></div>
+            <div class="mcp-item visible"><div class="mcp-item-top"><span class="mcp-id">#4410</span><span class="mcp-tier act">ACT</span><span class="mcp-rel">0.71</span></div><div class="mcp-sum">10x scope change</div></div>
+            <div class="mcp-item visible"><div class="mcp-item-top"><span class="mcp-id">#4402</span><span class="mcp-tier cmpr">CMPR</span><span class="mcp-rel">0.66</span></div><div class="mcp-sum">Routed → Sarah</div></div>
+            <div class="amp-section">FILTERED</div>
+            <div class="mcp-item visible"><div class="mcp-item-top"><span class="mcp-id">#4401</span><span class="mcp-tier supr">SUPR</span></div><div class="mcp-sum">Superseded</div></div>
+          </div>
+        </div>
+        <!-- input -->
+        <div class="app-input">
+          <div class="app-input-field">Ask project memory…</div>
+          <div class="app-send">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="how" class="how">
+  <div class="reveal s-label">How it works</div>
+  <div class="reveal d1 s-head">Four agents. One shared memory.</div>
+  <div class="reveal d2 s-sub">Every action is stored, compressed, and made available across all agents — so a risk caught by one shapes an assignment made by another.</div>
+  <div class="how-steps" style="margin-top:56px">
+    <div class="how-step reveal d1">
+      <div class="how-icon blue"><span>📥</span><span class="how-num">01</span></div>
+      <div class="how-title">You act or decide</div>
+      <div class="how-desc">A task is created, a risk is dismissed, an assignment is overridden. Every action is a signal.</div>
+    </div>
+    <div class="how-step reveal d2">
+      <div class="how-icon purple"><span>🧠</span><span class="how-num">02</span></div>
+      <div class="how-title">Memory Agent processes it</div>
+      <div class="how-desc">The event is ingested, relevance-scored, and tiered: active, compressed, or archived with a decay clock.</div>
+    </div>
+    <div class="how-step reveal d3">
+      <div class="how-icon green"><span>✦</span><span class="how-num">03</span></div>
+      <div class="how-title">All agents respond smarter</div>
+      <div class="how-desc">Risk, Assignment, and Cascade agents pull from that memory — their next output is shaped by what you just did.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BENTO FEATURES -->
+<div id="features" class="bento">
+  <div class="reveal s-label">Features</div>
+  <div class="reveal d1 s-head">Explainability is the product.</div>
+  <div class="reveal d2 s-sub">Every agent output comes with a receipt — the exact memories used, filtered, and preferences applied.</div>
+  <div class="bento-grid">
+
+    <!-- LARGE: Memory Autopsy -->
+    <div class="bento-card large reveal">
+      <div class="bento-label">Memory Autopsy</div>
+      <div class="bento-heading">Ask why.<br>Get the receipts.</div>
+      <div class="bento-sub">Every chatbot answer opens a terminal showing the exact memories loaded, filtered, and preferences applied. No black boxes.</div>
+      <div class="bento-terminal" id="bento-terminal"><div class="bt-line bt-comment">▸ 2,940 / 8,192 tokens — 7 loaded, 4 filtered</div><div class="bt-line bt-label2">LOADED</div><div class="bt-line bt-row">#4421  timeline_shift   0.95  ACT  Payment API +3d</div><div class="bt-line bt-row">#4418  risk_flag         0.81  ACT  Sarah 91% overload</div><div class="bt-line bt-row">#4410  requirement       0.71  ACT  10x traffic scope</div><div class="bt-line bt-row">#4402  assignment        0.66  CMPR Routed → Sarah</div><div class="bt-line bt-row">#4388  preference        0.58  CMPR Tolerance learned</div><div class="bt-line bt-label2">FILTERED</div><div class="bt-line bt-filt">#4401  assignment        0.05  SUPR Superseded by #4420</div><div class="bt-line bt-filt">#3990  requirement       0.04  ARCH Archived &gt;365 days</div><div class="bt-line bt-label2">PREFERENCES</div><div class="bt-line bt-pref">assignment_override  (0.74)  → Sarah first</div><div class="bt-line bt-pref">communication_style  (0.78)  → Bullet format</div></div>
+    </div>
+
+    <!-- Risk Radar -->
+    <div class="bento-card risk reveal d1">
+      <div class="bento-label">Risk Radar</div>
+      <div class="bento-heading" style="font-size:18px">Risks that learn<br>your tolerance.</div>
+      <div class="bento-sub" style="font-size:13px; margin-bottom:18px">Overload, blocker chains, deadline slips — suppressed based on what you actually dismiss.</div>
+      <div class="mini-risk-list">
+        <div class="mini-risk"><div class="mini-risk-dot" style="background:#FF3B30"></div><div class="mini-risk-text">Sarah Chen 91% — overload risk</div><div class="mini-risk-sev" style="color:#FF6B6B">Critical</div></div>
+        <div class="mini-risk"><div class="mini-risk-dot" style="background:#FF6B2B"></div><div class="mini-risk-text">3-task blocker chain forming</div><div class="mini-risk-sev" style="color:#FF8C5A">High</div></div>
+        <div class="mini-risk" style="opacity:0.45"><div class="mini-risk-dot" style="background:#4A607A"></div><div class="mini-risk-text">Marcus Webb 64% <span style="color:#4A607A;font-size:10px">· hidden by preference</span></div></div>
+      </div>
+    </div>
+
+    <!-- Assignment -->
+    <div class="bento-card assign reveal d2">
+      <div class="bento-label">Assignment Agent</div>
+      <div class="bento-heading" style="font-size:18px">Scored candidates,<br>not gut feelings.</div>
+      <div class="bento-sub" style="font-size:13px; margin-bottom:16px">Skill × load × velocity × context affinity — with a preference layer over the top.</div>
+      <div class="score-card">
+        <div class="score-avatar" style="background:linear-gradient(135deg,hsl(280 55% 42%),hsl(310 55% 32%))">SC</div>
+        <div class="score-bar-wrap"><div class="score-name">Sarah Chen <span style="font-family:JetBrains Mono;font-size:18px;font-weight:800;color:#10B981"> 88</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:88%;background:linear-gradient(90deg,#10B981,#38BDF8)"></div></div></div>
+      </div>
+      <div class="score-card" style="opacity:0.55">
+        <div class="score-avatar" style="background:linear-gradient(135deg,hsl(200 55% 42%),hsl(230 55% 32%))">MW</div>
+        <div class="score-bar-wrap"><div class="score-name">Marcus Webb <span style="font-family:JetBrains Mono;font-size:18px;font-weight:800;color:#F59E0B"> 71</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:71%;background:linear-gradient(90deg,#F59E0B,#FBB740)"></div></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats" id="results">
+  <div class="stats-inner">
+    <div class="stat-b reveal"><div class="stat-n"><span class="counter" data-to="74" data-suffix="%">—</span></div><div class="stat-l">Suggestions accepted<br>without override</div></div>
+    <div class="stat-b reveal d1"><div class="stat-n"><span class="counter" data-to="6" data-suffix="×">—</span></div><div class="stat-l">Faster time-to-assign<br>vs manual</div></div>
+    <div class="stat-b reveal d2"><div class="stat-n"><span class="counter" data-to="91" data-suffix="%">—</span></div><div class="stat-l">Critical risks caught<br>before they land</div></div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <div class="reveal s-label" style="margin-bottom:20px">Built for teams that ship</div>
+  <div class="reveal d1 cta-h">Enter the operating room.</div>
+  <div class="reveal d2 cta-sub">Persistent memory. Four agents. Zero black boxes. One PM that learns as you lead.</div>
+  <div class="reveal d3">
+    <button class="btn-cta" onclick="window.location.href='NeuralPM.html'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.6-1.5A2.5 2.5 0 0 0 4 6a2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 15a3 3 0 0 0 5 2"/><path d="M12 5a3 3 0 0 1 5.6-1.5A2.5 2.5 0 0 1 20 6a2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 15a3 3 0 0 1-5 2"/><path d="M12 5v12"/></svg>
+      Open NeuralPM
+    </button>
+    <p class="cta-note">No setup · Demo mode · Learning starts on first use</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="nav-logo" style="font-size:13px">
+      <div class="nav-logo-mark" style="width:24px;height:24px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.6-1.5A2.5 2.5 0 0 0 4 6a2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 15a3 3 0 0 0 5 2"/><path d="M12 5a3 3 0 0 1 5.6-1.5A2.5 2.5 0 0 1 20 6a2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 15a3 3 0 0 1-5 2"/><path d="M12 5v12"/></svg>
+      </div>
+      NEURAL PM
+    </div>
+    <p class="footer-copy">© 2026 NeuralPM · design prototype</p>
+    <a class="footer-link" href="NeuralPM.html">Open App →</a>
+  </div>
+</footer>
+
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" onload="(function(){var s=document.createElement('scr'+'ipt');s.src='landing.js';document.head.appendChild(s);})()">
+</body>
+</html>

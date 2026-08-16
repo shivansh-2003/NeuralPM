@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralPM — Project Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<!-- Resources referenced only as strings inside boot.js / onload — declared so the bundler inlines them -->
+<meta name="ext-resource-dependency" content="boot.js" data-resource-id="boot" />
+<meta name="ext-resource-dependency" content="https://unpkg.com/react@18.3.1/umd/react.development.js" data-resource-id="react" />
+<meta name="ext-resource-dependency" content="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" data-resource-id="reactDom" />
+<meta name="ext-resource-dependency" content="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" data-resource-id="babel" />
+<meta name="ext-resource-dependency" content="data.js" data-resource-id="data" />
+<meta name="ext-resource-dependency" content="components.jsx" data-resource-id="components" />
+<meta name="ext-resource-dependency" content="charts.jsx" data-resource-id="charts" />
+<meta name="ext-resource-dependency" content="nav.jsx" data-resource-id="nav" />
+<meta name="ext-resource-dependency" content="tasks.jsx" data-resource-id="tasks" />
+<meta name="ext-resource-dependency" content="assignment.jsx" data-resource-id="assignment" />
+<meta name="ext-resource-dependency" content="chatbot.jsx" data-resource-id="chatbot" />
+<meta name="ext-resource-dependency" content="insights.jsx" data-resource-id="insights" />
+<meta name="ext-resource-dependency" content="cascade.jsx" data-resource-id="cascade" />
+<meta name="ext-resource-dependency" content="members.jsx" data-resource-id="members" />
+<meta name="ext-resource-dependency" content="settings.jsx" data-resource-id="settings" />
+<meta name="ext-resource-dependency" content="app.jsx" data-resource-id="app" />
+
+<template id="__bundler_thumbnail" data-bg-color="#060B18">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#060B18"/>
+    <g fill="none" stroke="#1E3352" stroke-width="2">
+      <circle cx="600" cy="400" r="120"/>
+      <circle cx="600" cy="400" r="190" stroke="#13243d"/>
+    </g>
+    <g stroke="#0EA5E9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M600 320a48 48 0 0 0-90-22 40 40 0 0 0-38 40 40 40 0 0 0 8 72 40 40 0 0 0 40 72 48 48 0 0 0 80 30"/>
+      <path d="M600 320a48 48 0 0 1 90-22 40 40 0 0 1 38 40 40 40 0 0 1-8 72 40 40 0 0 1-40 72 48 48 0 0 1-80 30"/>
+      <path d="M600 296v200"/>
+    </g>
+    <circle cx="600" cy="400" r="190" fill="none" stroke="#0EA5E9" stroke-width="3" stroke-dasharray="6 18" opacity="0.5"/>
+    <text x="600" y="640" text-anchor="middle" fill="#F1F5F9" font-family="'Syne',sans-serif" font-size="56" font-weight="700" letter-spacing="8">NEURAL PM</text>
+    <text x="600" y="688" text-anchor="middle" fill="#4A607A" font-family="monospace" font-size="22" letter-spacing="3">PROJECT OPERATING SYSTEM</text>
+  </svg>
+</template>
+</head>
+<body>
+<div id="root"></div>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" onload="(function(){if(window.__booted)return;window.__booted=1;var n=0;(function go(){var b=(window.__resources&&window.__resources.boot);if(!b&&n++<80){return setTimeout(go,25);}var s=document.createElement('scr'+'ipt');s.src=b||'boot.js';document.head.appendChild(s);})();})()">
+</body>
+</html>

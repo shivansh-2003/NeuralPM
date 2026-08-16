@@ -42,3 +42,10 @@ redis>=5.0
 
 # Misc
 python-dotenv==1.0.1
+
+# --- domain/ layer (SQLAlchemy ORM + Alembic, separate from the psycopg2/schema.sql
+# stack above used by memory_agent — see main.py vs api.py) ---
+SQLAlchemy==2.0.50
+alembic==1.19.1
+pydantic-settings==2.15.0
+pytest==9.1.1
