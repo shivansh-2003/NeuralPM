@@ -10,6 +10,10 @@ from domain.projects.models import Project  # noqa: F401
 from domain.members.models import Member  # noqa: F401
 from domain.tasks.models import Task, TaskDependency  # noqa: F401
 from domain.milestones.models import Milestone  # noqa: F401
+from domain.users.models import User  # noqa: F401
+from domain.notifications.models import Notification  # noqa: F401
+from domain.agent_settings.models import AgentSetting  # noqa: F401
+from preferences.models import UserPreference  # noqa: F401
 
 
 @pytest.fixture(scope="function")
