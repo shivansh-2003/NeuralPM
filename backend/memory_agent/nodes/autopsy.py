@@ -119,6 +119,8 @@ def autopsy_node(state: dict) -> dict:
             "active_project":      budget.get("active_project", 0),
             "causal_history":      budget.get("causal_history", 0),
             "recent_conversation": budget.get("recent_conversation", 0),
+            "user_preferences":    budget.get("user_preferences", 0),
+            "reserve":             budget.get("reserve", 0),
         },
     }
 

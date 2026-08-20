@@ -11,6 +11,7 @@ from domain.notifications.router import router as notifications_router
 from domain.projects.router import router as projects_router
 from domain.tasks.router import router as tasks_router
 from domain.users.router import router as users_router
+from memory_agent.router import router as memory_router
 from preferences.router import router as preferences_router
 from realtime.router import router as realtime_router
 from search.router import router as search_router
@@ -47,6 +48,7 @@ app.include_router(agent_settings_router)
 app.include_router(preferences_router)
 app.include_router(realtime_router)
 app.include_router(search_router)
+app.include_router(memory_router)
 
 
 @app.get("/health")

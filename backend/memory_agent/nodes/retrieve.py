@@ -20,9 +20,23 @@ project_id isolation rule:
   The hard filter on project_id is a guarantee, not a convenience. If it is
   missing, we raise immediately. FalkorDB's per-user isolation (mem0_{user_id})
   adds a second physical boundary on top of this metadata filter.
+
+Archived-tier exclusion:
+  Phase 1.5's decay job will start tagging old memories memory_tier='archived'.
+  We exclude those from chat context now, ahead of that job existing, so
+  Phase 1.5 doesn't need to touch this file. mem0's `{"in": [...]}` filter
+  operator is reported broken against the Qdrant backend (mem0 issue #3975 —
+  see README "Decisions baked in"), so this is a post-filter in code, not a
+  query-side filter.
+
+Access bookkeeping:
+  Bumping access_count/last_accessed on the top hits is decay bookkeeping for
+  Phase 1.5's relevance scoring. It's best-effort — a Postgres hiccup here
+  must never fail a chat query.
 """
 
 from memory_agent.config import get_mem0_client
+from db import get_pg_conn
 
 MAX_RESULTS = 8
 
@@ -57,6 +71,22 @@ def retrieve_node(state: dict) -> dict:
     else:
         memories   = response if isinstance(response, list) else []
         relations  = []
+
+    memories = [m for m in memories if (m.get("metadata") or {}).get("memory_tier") != "archived"]
+
+    memory_ids = [m.get("id") for m in memories if m.get("id")]
+    if memory_ids:
+        try:
+            conn = get_pg_conn()
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE memory_events SET access_count = access_count + 1, "
+                    "last_accessed = NOW() WHERE id = ANY(%s)",
+                    (memory_ids,),
+                )
+            conn.commit()
+        except Exception:
+            pass
 
     return {
         "retrieved_memories": memories,

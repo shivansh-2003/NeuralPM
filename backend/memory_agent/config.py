@@ -44,9 +44,6 @@ class Settings(BaseSettings):
     embed_model: str = "qwen3-embedding:0.6b"
     embed_dims: int = 1024  # MUST match embed_model's real output dimension
 
-    # API
-    frontend_origin: str = "http://localhost:5173"
-
 
 @lru_cache
 def get_settings() -> Settings:
@@ -97,6 +94,14 @@ was overloaded", create both the overload node and the DELAYED_BY relationship.
 # --------------------------------------------------------------------------- #
 
 def _build_mem0_client():
+    """
+    ── DEPLOYMENT SWAP POINT ──────────────────────────────────────────────
+    To switch to OpenAI for production: set embedder.provider to "openai",
+    model to "text-embedding-3-small", and embed_dims to 1536. This REQUIRES
+    a new Qdrant collection — dims can't change on an existing one. Do not
+    do this until the Ollama path is fully proven.
+    ────────────────────────────────────────────────────────────────────────
+    """
     from mem0 import Memory  # imported AFTER register() has patched internals
 
     s = get_settings()
@@ -168,6 +173,14 @@ def get_mem0_client():
 # thinking and constrain output format. temperature=0 for deterministic parsing.
 
 def get_llm(json_mode: bool = True, temperature: float = 0.0):
+    """
+    ── DEPLOYMENT SWAP POINT ──────────────────────────────────────────────
+    To switch to OpenAI: return ChatOpenAI(model="gpt-5.6", ...) here. Note
+    GPT-5.6 doesn't need reasoning=False or <think>-block stripping — that
+    logic (see parse_llm_json) is Qwen3-specific and should become
+    conditional (or removed) on this swap.
+    ────────────────────────────────────────────────────────────────────────
+    """
     from langchain_ollama import ChatOllama
 
     s = get_settings()

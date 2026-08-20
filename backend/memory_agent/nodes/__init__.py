@@ -10,8 +10,12 @@ def parse_llm_json(raw: str) -> dict:
     Even with format="json", models occasionally wrap output in ```json fences
     or prepend stray whitespace. This strips fences and grabs the first JSON
     object if there is surrounding text. Raises json.JSONDecodeError on failure.
+
+    Also strips <think>...</think> blocks: reasoning=False disables Qwen3's
+    thinking mode, but it isn't airtight — a leaked think-block ahead of the
+    JSON is the single biggest cause of parse failures if left in.
     """
-    text = raw.strip()
+    text = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
 
     # Strip ```json ... ``` or ``` ... ``` fences.
     if text.startswith("```"):

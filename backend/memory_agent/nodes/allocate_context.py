@@ -103,6 +103,12 @@ def allocate_context_node(state: dict) -> dict:
         "active_project":      active_tok,
         "causal_history":      causal_tok,
         "recent_conversation": history_tok,
+        # No Phase 3 (Preferences) agent exists yet to populate this slice, and
+        # "reserve" is headroom nothing ever writes into. Both are returned
+        # explicitly as 0 — not omitted — so the response shape is stable and
+        # Phase 3 only needs to fill the number, not add a new key downstream.
+        "user_preferences":    0,
+        "reserve":             0,
         "total":               active_tok + causal_tok + history_tok,
         "ceiling":             MAX_TOKENS,
         "pct_used":            round((active_tok + causal_tok + history_tok) / MAX_TOKENS * 100, 1),
@@ -112,6 +118,7 @@ def allocate_context_node(state: dict) -> dict:
         "context_memories":    context_memories,
         "context_relations":   relations,           # pass through unchanged
         "context_history":     history_sel,
+        "context_preferences": [],                  # Phase 3 hook
         "budget_used":         budget_used,
         "filtered_out_budget": filtered_overflow,   # for Autopsy
     }

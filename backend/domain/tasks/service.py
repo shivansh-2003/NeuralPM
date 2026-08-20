@@ -1,3 +1,4 @@
+import threading
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -11,8 +12,52 @@ from domain.tasks.schemas import TaskCreate, TaskUpdate
 from realtime.websocket_manager import broadcast
 
 
+def _record_task_memory(task, event_type: str, description: str) -> None:
+    """Best-effort — memory-layer or Ollama/Qdrant hiccups must never fail or even
+    slow down a task write. Runs on a daemon thread rather than inline: when Qdrant
+    is unreachable, mem0's client construction hangs (observed >120s, no fast-fail),
+    so a plain try/except in the request path isn't enough — only "off the request
+    path entirely" is.
+
+    user_id="default_user" matches memory_agent's own request-schema default —
+    there's no auth on either path yet, so this is the one identity chat queries
+    actually search under.
+    """
+    def _write():
+        try:
+            from memory_agent.writer import write_memory_event
+
+            write_memory_event(
+                description,
+                user_id="default_user",
+                project_id=str(task.project_id),
+                event_type=event_type,
+                agent_source="user",
+                sprint_id=str(task.sprint_id) if task.sprint_id else None,
+                task_id=str(task.id),
+                member_id=str(task.assignee_id) if task.assignee_id else None,
+                priority=task.severity or "medium",
+                affected_module=task.affected_module,
+            )
+        except Exception:
+            pass
+
+    threading.Thread(target=_write, daemon=True).start()
+
+
 def create_task(db: Session, data: TaskCreate):
-    return repository.create(db, data)
+    task = repository.create(db, data)
+
+    parts = [f'Task "{task.title}" created']
+    if task.category:
+        parts.append(f"({task.category})")
+    if task.severity:
+        parts.append(f"— {task.severity} priority")
+    if task.assignee_id:
+        parts.append(f"— assigned to member {task.assignee_id}")
+    _record_task_memory(task, "task_created", " ".join(parts) + ".")
+
+    return task
 
 
 def get_task(db: Session, task_id: UUID):
@@ -30,6 +75,7 @@ def update_task(db: Session, task_id: UUID, data: TaskUpdate):
     task = get_task(db, task_id)
     due_date_changed = data.due_date is not None and data.due_date != task.due_date
     status_changed_to_blocked = data.status == "blocked" and task.status != "blocked"
+    assignee_changed = data.assignee_id is not None and data.assignee_id != task.assignee_id
     old_assignee = task.assignee_id
 
     updated = repository.update(db, task, data)
@@ -51,6 +97,21 @@ def update_task(db: Session, task_id: UUID, data: TaskUpdate):
     # No-op today; the Cascade Agent plugs in here later with zero router/repo changes.
     if due_date_changed or status_changed_to_blocked:
         pass  # TODO(agents/cascade): trigger_cascade(project_id, task_id)
+
+    if due_date_changed or status_changed_to_blocked or assignee_changed:
+        changes = []
+        if status_changed_to_blocked:
+            changes.append("is now blocked")
+        if due_date_changed:
+            changes.append(f"due date changed to {updated.due_date}")
+        if assignee_changed:
+            changes.append(f"reassigned to member {updated.assignee_id}")
+        event_type = (
+            "risk_flag" if status_changed_to_blocked
+            else "timeline_shift" if due_date_changed
+            else "assignment"
+        )
+        _record_task_memory(updated, event_type, f'Task "{updated.title}" {", ".join(changes)}.')
 
     return updated
 

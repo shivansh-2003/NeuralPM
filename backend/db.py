@@ -1,25 +1,25 @@
-"""Postgres connection singleton.
+"""Postgres connection singleton for the memory_agent's raw SQL writes
+(memory_events — not an ORM-mapped table, see domain/ for those).
 
 Usage (in any node or task):
     from db import get_pg_conn
     conn = get_pg_conn()
-    row = conn.execute("SELECT * FROM memory_events WHERE id=%s", (event_id,)).fetchone()
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM memory_events WHERE id=%s", (event_id,))
+        row = cur.fetchone()
     conn.commit()
 
-The connection is created once per process and reused. If the connection drops,
-psycopg2 will raise OperationalError — the caller should handle or let it bubble
-up to FastAPI which returns 500.
-
-Environment variable: DATABASE_URL
-  Format: postgresql://user:password@host:port/dbname
-  Example: postgresql://postgres:postgres@localhost:5432/neuralpm
+psycopg2 connections don't support .execute() directly — always go through
+a cursor. Reuses core.config's database_url (Phase 0's settings) rather than
+reading DATABASE_URL again, so there is one source of truth for the DB URL.
 """
 
-import os
 import threading
 
 import psycopg2
 import psycopg2.extras  # RealDictCursor
+
+from core.config import get_settings
 
 _lock = threading.Lock()
 _conn = None
@@ -30,14 +30,8 @@ def get_pg_conn():
     global _conn
     with _lock:
         if _conn is None or _conn.closed:
-            database_url = os.environ.get("DATABASE_URL")
-            if not database_url:
-                raise RuntimeError(
-                    "DATABASE_URL environment variable is not set. "
-                    "Example: postgresql://postgres:postgres@localhost:5432/neuralpm"
-                )
             _conn = psycopg2.connect(
-                database_url,
+                get_settings().database_url,
                 cursor_factory=psycopg2.extras.RealDictCursor,
             )
             _conn.autocommit = False

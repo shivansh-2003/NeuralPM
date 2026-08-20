@@ -21,7 +21,7 @@ File attachment path (Iteration 9):
 from memory_agent.config import get_llm, get_settings
 
 SYNTHESIZE_PROMPT = """You are a project intelligence assistant for NeuralPM.
-Answer the user's question using ONLY the two sources below.
+Answer the user's question using ONLY the sources below.
 Do not use any outside knowledge.
 
 ── Vector Memories (semantic search hits) ─────────────────────────────────────
@@ -29,6 +29,9 @@ Do not use any outside knowledge.
 
 ── Graph Relations (entity relationships from FalkorDB) ──────────────────────
 {relations}
+
+── Recent Conversation ────────────────────────────────────────────────────────
+{conversation}
 
 ───────────────────────────────────────────────────────────────────────────────
 Question: {query}
@@ -38,6 +41,7 @@ Rules:
 - Cite vector memories: [mem_abc123]
 - Cite graph relationships with [graph], e.g. "Sarah is ASSIGNED_TO Payment API [graph]"
 - Combine both sources when they complement each other.
+- Use the recent conversation for continuity (e.g. resolving "it"/"that task"), not as a fact source.
 - If neither source contains enough information, say so plainly.
 - Do not invent facts not present in either source."""
 
@@ -80,10 +84,17 @@ def _fmt_relations(relations: list) -> str:
     return "\n".join(lines)
 
 
+def _fmt_conversation(history_selected: list) -> str:
+    if not history_selected:
+        return "  (none)"
+    return "\n".join(f"  {h.get('memory', '')}" for h in history_selected)
+
+
 def synthesize_node(state: dict) -> dict:
     # Prefer allocate_context output; fall back to raw retrieve output.
     memories  = state.get("context_memories")  or state.get("retrieved_memories", [])
     relations = state.get("context_relations") or state.get("graph_relations",    [])
+    history   = state.get("context_history", [])
     query     = state.get("query", "")
     attachment = state.get("attachment")   # base64 for Qwen-VL (I-9 onwards)
 
@@ -97,6 +108,7 @@ def synthesize_node(state: dict) -> dict:
     prompt = SYNTHESIZE_PROMPT.format(
         memories=_fmt_memories(memories),
         relations=_fmt_relations(relations),
+        conversation=_fmt_conversation(history),
         query=query,
     )
 

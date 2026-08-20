@@ -1,14 +1,19 @@
 # --- Core stack (pinned to avoid the version-drift failures the research flagged) ---
 
-# Memory abstraction — [graph] extra required for graph_store support (added in 1.0.0)
-# Upgraded from 0.1.114 which had no graph store support.
-mem0ai[graph]>=1.0.0
+# Memory abstraction — pinned to 1.0.11, NOT >=1.0.0. mem0-falkordb 0.4.1
+# (the only published version) monkey-patches mem0.utils.factory.GraphStoreFactory
+# and mem0.graphs.configs.GraphStoreConfig — both were removed in mem0ai 2.x's
+# restructure, so anything >=2.0.0 breaks register() at import time.
+# No [graph] extra: it pulls in kuzu, which has no prebuilt wheel and fails to
+# build from source on newer Pythons. We don't need it — FalkorDB is wired in
+# via mem0-falkordb's own patch, not mem0's built-in graph extras.
+mem0ai==1.0.11
 
 # FalkorDB graph memory plugin for mem0.
 # register() patches mem0 internals at runtime — no fork of mem0 needed.
 # Blog: https://www.falkordb.com/blog/graph-memory-llm-agents-mem0-falkordb/
 # Repo:  https://github.com/FalkorDB/mem0-falkordb
-mem0-falkordb>=0.1.0
+mem0-falkordb==0.4.1
 
 # FalkorDB Python client (Redis wire protocol — same port 6379)
 falkordb>=1.0.0
